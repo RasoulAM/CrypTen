@@ -89,7 +89,7 @@ class FuncBenchmarks:
         tensor_size (int or tuple): size of tensor for benchmarking runtimes
     """
 
-    BINARY = ["add", "sub", "mul", "matmul", "gt", "lt", "eq"]
+    BINARY = ["add", "sub", "mul", "matmul", "gt", "lt", "eq", "fast_pow"]
 
     UNARY = [
         "sigmoid",

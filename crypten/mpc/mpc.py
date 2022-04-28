@@ -319,6 +319,7 @@ BINARY_FUNCTIONS = [
     "conv2d",
     "conv_transpose1d",
     "conv_transpose2d",
+    "fast_pow",
 ]
 
 

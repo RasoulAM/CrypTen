@@ -17,6 +17,7 @@ from crypten.config import cfg
 from crypten.cryptensor import CrypTensor
 from crypten.cuda import CUDALongTensor
 from crypten.encoder import FixedPointEncoder
+import crypten
 
 from . import beaver, replicated  # noqa: F401
 
@@ -419,7 +420,40 @@ class ArithmeticSharedTensor(object):
         """Perform element-wise subtraction"""
         return self._arithmetic_function_(y, "sub")
 
+    def fast_pow(self, k):
+        """Perform element-wise exponentiation by constant k"""
+        assert comm.get().get_world_size() == 2, "Exponentation only supported for two parties"
+
+        a_s=[]
+        for i in range(k+1):
+            a_s += [crypten.cryptensor(
+                self.share ** i,
+                precision=0,
+                src=0
+            )]
+
+        b_s=[]
+        for i in range(k+1):
+            b_s += [crypten.cryptensor(
+                self.share ** (k-i),
+                precision=0,
+                src=1
+            )]
+
+        # ans = crypten.cryptensor(torch.zeros_like(self.share), precision=0)
+        # ans.share = torch.tensor(torch.zeros_like(self.share))
+
+        ans = crypten.mpc.MPCTensor.from_shares(torch.zeros_like(self.share), precision=0)
+
+        nCr=1
+        for i in range(k+1):
+            ans += int(nCr) * a_s[i].mul(b_s[i])
+            nCr *= (k-i) / (i+1)
+
+        return ans
+
     def mul(self, y):
+        # print("Performing Mult")
         """Perform element-wise multiplication"""
         if isinstance(y, int):
             result = self.clone()

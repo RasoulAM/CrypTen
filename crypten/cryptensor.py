@@ -127,6 +127,7 @@ class CrypTensor(object, metaclass=CrypTensorMetaclass):
         "copy_",
         "div_",
         "matmul",
+        "fast_pow",
         "neg",
     ]
 
